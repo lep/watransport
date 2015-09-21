@@ -258,6 +258,7 @@ class Account:
             #self.markWAMessageAsReceived(msg = msg)
             logger.info(msg)
         else:
+            logger.debug(msg)
             self.media_downloader.download(msg)
 
 
