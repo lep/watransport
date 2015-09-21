@@ -56,7 +56,7 @@ class MediaDownloader:
                             hashsum.update(chunk)
     
                         computed_hashsum = base64.b64encode(hashsum.digest())
-    
+                        logger.debug("Downloaded file "+filepath+" with hashsum "+computed_hashsum)
                         if message.fileHash != computed_hashsum:
                             logger.info("hashsum mismatch: %s /= %s" % (message.fileHash, computed_hashsum))
                             raise Exception()
