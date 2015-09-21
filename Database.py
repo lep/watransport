@@ -3,54 +3,65 @@
 import sqlite3
 import random
 import string
+import threading
 
 def randomword(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 class Database:
+    database = None
+    lock = None
 
     def __init__(self, database):
-        self.database = sqlite3.connect(database)
+        # is check_same_thread needed?
+        self.database = sqlite3.connect(database, check_same_thread=False)
+        self.lock = threading.Lock()
 
 
     def read_accounts(self):
-        c = self.database.cursor()
-        c.execute("SELECT owner, number, password FROM account")
-        return c.fetchall()
+        with self.lock:
+            c = self.database.cursor()
+            c.execute("SELECT owner, number, password FROM account")
+            return c.fetchall()
 
 
     def read_roster(self, owner):
-        c = self.database.cursor()
-        c.execute( "SELECT number FROM roster WHERE owner = ?", (owner,) )
-        return c.fetchall()
+        with self.lock:
+            c = self.database.cursor()
+            c.execute( "SELECT number FROM roster WHERE owner = ?", (owner,) )
+            return c.fetchall()
 
     def save_path(self, path, frm, msgid):
-        rid = randomword(10)
-        c = self.database.cursor()
-        c.execute( "INSERT INTO files (path, frm, read, password) VALUES (?, ?, ?, ?)"
-                 , (path, frm, msgid, rid)
-                 )
-        return (c.lastrowid, rid)
+        with self.lock:
+            rid = randomword(10)
+            c = self.database.cursor()
+            c.execute( "INSERT INTO files (path, frm, read, password) VALUES (?, ?, ?, ?)"
+                     , (path, frm, msgid, rid)
+                     )
+            return (c.lastrowid, rid)
 
     def add_contact(self, owner, contact):
-        c = self.database.cursor()
-        c.execute( "INSERT INTO roster (owner, number) VALUES (?, ?)"
-                 , (owner, contact)
-                 )
+        with self.lock:
+            c = self.database.cursor()
+            c.execute( "INSERT INTO roster (owner, number) VALUES (?, ?)"
+                     , (owner, contact)
+                     )
 
 
     def lookup_path(self, id1, id2):
-        c = self.database.cursor()
-        c.execute( "SELECT path, reciever, frm, read FROM files WHERE rowid = ? AND password = ?"
-                 , (id1, id2)
-                 )
-        return c.fetchone()
+        with self.lock:
+            c = self.database.cursor()
+            c.execute( "SELECT path, reciever, frm, read FROM files WHERE rowid = ? AND password = ?"
+                     , (id1, id2)
+                     )
+            return c.fetchone()
 
     def set_file_read(self, id1, id2):
-        c = self.database.cursor()
-        c.execute( "UPDATE files SET read = 0 WHERE rowid = ? AND password = ?"
-                 , (id1, id2)
-                 )
+        with self.lock:
+            c = self.database.cursor()
+            c.execute( "UPDATE files SET read = 0 WHERE rowid = ? AND password = ?"
+                     , (id1, id2)
+                     )
 
 def get_database(path):
     if not hasattr(get_database, '__instances'):
