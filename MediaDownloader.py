@@ -38,7 +38,7 @@ class MediaDownloader:
         path = os.path.join(self.config.data_dir, str(self.account.number), mime)
         mkdir_p(path)
 
-        waTransportJid = Jid(message.getTo())
+        waTransportJid = Jid(message.getFrom())
         waTransportJid.server = self.config.transport_domain
         waTransportJid = waTransportJid.bare
 
