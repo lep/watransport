@@ -8,6 +8,7 @@ import errno
 import logging
 import time
 
+from Database import get_database
 
 logger = logging.getLogger('watransport.mediadownloader')
 
@@ -56,7 +57,7 @@ class MediaDownloader:
                             hashsum.update(chunk)
     
                         computed_hashsum = base64.b64encode(hashsum.digest())
-    
+                        logger.debug("Downloaded file "+filepath+" with hashsum "+computed_hashsum)
                         if message.fileHash != computed_hashsum:
                             logger.info("hashsum mismatch: %s /= %s" % (message.fileHash, computed_hashsum))
                             raise Exception()
@@ -65,12 +66,13 @@ class MediaDownloader:
                             (id1, id2) = db.save_path(filepath, message.getFrom(), message.getId())
                             # TODO: maybe add .jpg or similar
                             url = "http://%s:%s/%s/%s" % (self.config.http_host, self.config.http_port, id2, id1)
+                            logger.debug("MediaDownloader url: "+url)
                             # we are in a thread context and need locking
                             with self.account.xmpp.lock:
                                 self.account.sendToJabber(url, waTransportJid)
                                 self.account.markWAMessageAsReceived(msg = message)
-    
                 except:
+                    logger.exception("Unknown exception: ")
                     # don't use to much cpu in case of endless loop
                     time.sleep(5.0)
 

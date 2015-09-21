@@ -81,4 +81,4 @@ if __name__ == '__main__':
             time.sleep(3.0)
     except:
         x.shutdown()
-        sys.exit(0)
+        sys.exit(1)

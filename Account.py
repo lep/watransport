@@ -98,7 +98,7 @@ class Account:
     def __str__(self):
         return "Account: (%s, %s)" % (self.jid, self.password)
 
-    def sendToJabber(self, txt, mfrom):
+    def sendToJabber(self, text, mfrom):
         msg = message( mtype = "chat"
                      , body = text
                      , mfrom = mfrom
@@ -258,6 +258,7 @@ class Account:
             #self.markWAMessageAsReceived(msg = msg)
             logger.info(msg)
         else:
+            logger.debug(msg)
             self.media_downloader.download(msg)
 
 
