@@ -18,6 +18,7 @@ transport.db:
 
 clean:
 	@rm watransport.log
+    @rm watransport
 
 cli:
 	@yowsup-cli demos -y -l "${PHONE_NUMBER}:${WA_PASSWORD}"; reset

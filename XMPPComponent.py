@@ -5,6 +5,7 @@ import asyncore
 import hashlib
 import socket
 import inspect
+import threading
 import logging
 
 from Jid import Jid
@@ -34,13 +35,10 @@ Liest alle bestehen Accounts aus der Datenbank und erstellt Accountobjekte.
 Verteilt jede eingehende Nachricht an den richtigen Account.
 """
 class XMPPComponent(asyncore.dispatcher_with_send):
-
+    parser = None
     root = None
     current = None
     depth = 0
-
-    parser = None
-    ystack = None
 
     accounts = dict()
 
@@ -48,7 +46,9 @@ class XMPPComponent(asyncore.dispatcher_with_send):
     database = None
 
     mapping = dict()
-
+    
+    lock = threading.Lock()
+    
     def __init__(self, config):
         asyncore.dispatcher_with_send.__init__(self)
         self.config = config
@@ -77,6 +77,9 @@ class XMPPComponent(asyncore.dispatcher_with_send):
                 password = password.encode("UTF-8")
                 self.accounts[jid] = Account(jid, number, password, self, self.config)
 
+    ############################
+    # Jabber message callbacks #
+    ############################
     @On(handshake_tag)
     def streamReady(self, _):
         for jid, number, password in self.database.read_accounts():
@@ -95,9 +98,8 @@ class XMPPComponent(asyncore.dispatcher_with_send):
     @On(presence_tag)
     def handlePresence(self, message):
         jabberFrom = Jid(message.get("from")).bare
-        if jabberFrom not in self.accounts:
-            return
-        self.accounts[jabberFrom].incomingXMPPPresence(message)
+        if jabberFrom in self.accounts:
+            self.accounts[jabberFrom].incomingXMPPPresence(message)
 
     @On(iq_tag)
     def handleIq(self, msg):
@@ -106,9 +108,12 @@ class XMPPComponent(asyncore.dispatcher_with_send):
     @On(message_tag)
     def handleMessage(self, message):
         jabberFrom = Jid(message.get("from")).bare
-        if jabberFrom not in self.accounts:
-            return
-        self.accounts[jabberFrom].incomingXMPPMessage(message)
+        if jabberFrom in self.accounts:
+            self.accounts[jabberFrom].incomingXMPPMessage(message)
+        
+    ######################
+    # Asyncore callbacks #
+    ######################
 
     def handle_connect(self):
         self.write("<?xml version='1.0' encoding='UTF-8'?>")
@@ -124,7 +129,17 @@ class XMPPComponent(asyncore.dispatcher_with_send):
         buf = self.recv(4096)
         logger.debug("from server:  %s" % buf)
         self.parser.feed(buf)
+        
+    def handle_close(self):
+        # TODO: reconnect here
+        pass
+        
+                
 
+    #######################
+    # XMLParser callbacks #
+    #######################
+    
     def start(self, tag, attrib):
         if self.current is None:
             self.current = ET.Element(tag, attrib)

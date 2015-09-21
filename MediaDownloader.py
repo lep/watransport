@@ -6,6 +6,7 @@ import base64
 import os
 import errno
 import logging
+import time
 
 
 logger = logging.getLogger('watransport.mediadownloader')
@@ -43,30 +44,34 @@ class MediaDownloader:
         filepath = path + "/" + name
 
         def do():
-            try:
-                req = urllib2.urlopen(url)
-                hashsum = hashlib.sha256()
-                with open(filepath, "wb") as f:
-                    while True:
-                        chunk = req.read(4096)
-                        if not chunk: break
-                        f.write(chunk)
-                        hashsum.update(chunk)
-
-                    computed_hashsum = base64.b64encode(hashsum.digest())
-
-                    if message.fileHash != computed_hashsum:
-                        logger.info("hashsum mismatch: %s /= %s" % (message.fileHash, computed_hashsum))
-                        raise Exception()
-                    else:
-                        db = get_database(self.config.database)
-                        (id1, id2) = db.save_path(filepath, message.getId())
-                        # TODO: maybe add .jpg or similar
-                        url = "http://%s:%s/%s/%s" % (self.config.http_host, self.config.http_port, id2, id1)
-                        self.account.sendToJabber(url, waTransportJid)
-                        self.account.markWAMessageAsReceived(msg = message)
-
-            except:
-                do()
+            while True:
+                try:
+                    req = urllib2.urlopen(message.getMediaUrl())
+                    hashsum = hashlib.sha256()
+                    with open(filepath, "wb") as f:
+                        while True:
+                            chunk = req.read(4096)
+                            if not chunk: break
+                            f.write(chunk)
+                            hashsum.update(chunk)
+    
+                        computed_hashsum = base64.b64encode(hashsum.digest())
+    
+                        if message.fileHash != computed_hashsum:
+                            logger.info("hashsum mismatch: %s /= %s" % (message.fileHash, computed_hashsum))
+                            raise Exception()
+                        else:
+                            db = get_database(self.config.database)
+                            (id1, id2) = db.save_path(filepath, message.getId())
+                            # TODO: maybe add .jpg or similar
+                            url = "http://%s:%s/%s/%s" % (self.config.http_host, self.config.http_port, id2, id1)
+                            # we are in a thread context and need locking
+                            with self.account.xmpp.lock:
+                                self.account.sendToJabber(url, waTransportJid)
+                                self.account.markWAMessageAsReceived(msg = message)
+    
+                except:
+                    # don't use to much cpu in case of endless loop
+                    time.sleep(5.0)
 
         thread.start_new_thread(do, ())

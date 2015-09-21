@@ -46,7 +46,8 @@ class MediaRequest(HttpRequest):
                 self.push(chunk)
         if read:
             self.database.set_file_read(ids[0], ids[1])
-            self.accounts[to].markWAMessageAsRead(to = frm, id = id)
+            with self.accounts[to].xmpp.lock:
+                self.accounts[to].markWAMessageAsRead(to = frm, id = id)
 
 
     def onData(self, buff):

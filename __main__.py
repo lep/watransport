@@ -69,12 +69,15 @@ if __name__ == '__main__':
 
     try:
         while True:
-            asyncore.loop(timeout = 3.0, count = 10)
-            for acc in x.accounts.itervalues():
-                if acc.connected:
-                    acc.stack.do_detached_callback()
-                else:
-                    acc.try_to_connect()
+            #handle messages locked
+            with x.lock:
+                asyncore.loop(timeout = 3.0, count = 10)
+                for acc in x.accounts.itervalues():
+                    if acc.connected:
+                        acc.stack.do_detached_callback()
+                    else:
+                        acc.try_to_connect()
+            # leave some time for threads and such
             time.sleep(3.0)
     except:
         x.shutdown()

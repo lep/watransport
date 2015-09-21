@@ -46,7 +46,6 @@ class Account:
 
     config = None
 
-    connected = False
     message_queue = list()
 
     media_downloader = None
