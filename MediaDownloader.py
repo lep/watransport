@@ -8,6 +8,7 @@ import errno
 import logging
 import time
 
+from Database import get_database
 
 logger = logging.getLogger('watransport.mediadownloader')
 
