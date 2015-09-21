@@ -16,15 +16,20 @@ if __name__ == '__main__':
                        , dest = 'transport_password'
                        , help = 'The transport password'
                        , required = True )
-    parser.add_argument( '--http-host'
-                       , dest = 'http_host'
-                       , help = 'Address on which the httpd listens. Default: localhost'
+    parser.add_argument( '--http-bind'
+                       , dest = 'http_bind'
+                       , help = 'Address on which the httpd listens. Default: 127.0.0.1'
                        , default = "127.0.0.1" )
     parser.add_argument( '--http-port'
                        , dest = 'http_port'
                        , help = 'Port on which the httpd listens. Default: 8080'
                        , default = 8080
                        , type = int )
+    parser.add_argument( '--http-address'
+                       , dest = 'http_address'
+                       , help = 'Address which is send in messages. Default: 127.0.0.1'
+                       , default = '127.0.0.1'
+                       )
     parser.add_argument( '--xmpp-host'
                        , dest = 'xmpp_host'
                        , help = 'Address of the xmpp server. Default: localhost'

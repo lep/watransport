@@ -65,7 +65,7 @@ class MediaDownloader:
                             db = get_database(self.config.database)
                             (id1, id2) = db.save_path(filepath, message.getFrom(), message.getId())
                             # TODO: maybe add .jpg or similar
-                            url = "http://%s:%s/%s/%s" % (self.config.http_host, self.config.http_port, id2, id1)
+                            url = "http://%s:%s/%s/%s" % (self.config.http_address, self.config.http_port, id2, id1)
                             logger.debug("MediaDownloader url: "+url)
                             # we are in a thread context and need locking
                             with self.account.xmpp.lock:

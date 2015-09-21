@@ -86,7 +86,7 @@ class XMPPComponent(asyncore.dispatcher_with_send):
             number = number.encode("UTF-8")
             password = password.encode("UTF-8")
             self.accounts[jid] = Account(jid, number, password, self, self.config)
-        self.httpserver = HttpServer( self.config.http_host
+        self.httpserver = HttpServer( self.config.http_bind
                                     , self.config.http_port
                                     , serve_file(self.accounts, self.config)
                                     )
