@@ -224,19 +224,19 @@ class Account:
             self.xmpp.write(ET.tostring(msg))
 
     def _sendXMPPMessage(self, frm, text, id=None):
+        if id != None:
+            id = str(uuid.uuid1())
         xmsg = message( mto = self.jid
                       , mfrom = frm
                       , mtype = "chat"
                       , id = id
                       )
-
         body = ET.SubElement(xmsg, "body")
         body.text = text
 
         request = ET.SubElement(xmsg, "request")
         request.set("xmlns", "urn:xmpp:receipts")
-        if id != None:
-            id = str(uuid.uuid1())
+        
         request.set("id", id)
 
         markable = ET.SubElement(xmsg, "markable")
