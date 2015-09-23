@@ -107,7 +107,7 @@ class Account:
         #             , mto = self.jid
         #             )
         #self.xmpp.write(ET.tostring(msg))
-        sendXMPPMessage(mfrom, text)
+        self.sendXMPPMessage(mfrom, text)
 
     def _sendWAMessage(self, msg):
         if self.connected:
