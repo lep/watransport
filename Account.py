@@ -19,6 +19,7 @@ import hashlib
 import base64
 import thread
 import logging
+import uuid
 
 from Jid import Jid
 from XMPPLayer import XMPPLayer
@@ -98,13 +99,15 @@ class Account:
     def __str__(self):
         return "Account: (%s, %s)" % (self.jid, self.password)
 
+    # todo: remove this method
     def sendToJabber(self, text, mfrom):
-        msg = message( mtype = "chat"
-                     , body = text
-                     , mfrom = mfrom
-                     , mto = self.jid
-                     )
-        self.xmpp.write(ET.tostring(msg))
+        #msg = message( mtype = "chat"
+        #             , body = text
+        #             , mfrom = mfrom
+        #             , mto = self.jid
+        #             )
+        #self.xmpp.write(ET.tostring(msg))
+        sendXMPPMessage(mfrom, text)
 
     def _sendWAMessage(self, msg):
         if self.connected:
@@ -220,7 +223,7 @@ class Account:
 
             self.xmpp.write(ET.tostring(msg))
 
-    def _sendXMPPMessage(self, frm, text, id):
+    def _sendXMPPMessage(self, frm, text, id=None):
         xmsg = message( mto = self.jid
                       , mfrom = frm
                       , mtype = "chat"
@@ -232,6 +235,8 @@ class Account:
 
         request = ET.SubElement(xmsg, "request")
         request.set("xmlns", "urn:xmpp:receipts")
+        if id != None:
+            id = str(uuid.uuid1())
         request.set("id", id)
 
         markable = ET.SubElement(xmsg, "markable")
