@@ -117,7 +117,7 @@ class Account:
         logger.debug("mark wa message as received")
         if 'msg' in kwargs:
             msg = kwargs['msg']
-            outgoing = OutgoingReceiptProtocolEntity( msg.get("id")
+            outgoing = OutgoingReceiptProtocolEntity( msg.getId()
                                                     , msg.getFrom()
                                                     )
             #self._sendWAMessage(outgoing)
@@ -132,7 +132,7 @@ class Account:
     def markWAMessageAsRead(self, **kwargs):
         if 'msg' in kwargs:
             msg = kwargs['msg']
-            outgoing = OutgoingReceiptProtocolEntity( msg.get("id")
+            outgoing = OutgoingReceiptProtocolEntity( msg.getId()
                                                     , msg.getFrom(True)
                                                     , True
                                                     )
