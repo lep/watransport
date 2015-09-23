@@ -224,7 +224,7 @@ class Account:
             self.xmpp.write(ET.tostring(msg))
 
     def _sendXMPPMessage(self, frm, text, id=None):
-        if id != None:
+        if id == None:
             id = str(uuid.uuid1())
         xmsg = message( mto = self.jid
                       , mfrom = frm
