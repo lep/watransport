@@ -33,7 +33,7 @@ class Database:
             c.execute( "SELECT number FROM roster WHERE owner = ?", (owner,) )
             return c.fetchall()
             
-   def add_contact(self, owner, contact):
+    def add_contact(self, owner, contact):
         with self.lock:
             c = self.database.cursor()
             c.execute( "INSERT INTO roster (owner, number) VALUES (?, ?)"
