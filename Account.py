@@ -19,6 +19,7 @@ import hashlib
 import base64
 import thread
 import logging
+import uuid
 
 from Jid import Jid
 from XMPPLayer import XMPPLayer
@@ -98,13 +99,15 @@ class Account:
     def __str__(self):
         return "Account: (%s, %s)" % (self.jid, self.password)
 
+    # todo: remove this method
     def sendToJabber(self, text, mfrom):
-        msg = message( mtype = "chat"
-                     , body = text
-                     , mfrom = mfrom
-                     , mto = self.jid
-                     )
-        self.xmpp.write(ET.tostring(msg))
+        #msg = message( mtype = "chat"
+        #             , body = text
+        #             , mfrom = mfrom
+        #             , mto = self.jid
+        #             )
+        #self.xmpp.write(ET.tostring(msg))
+        self._sendXMPPMessage(mfrom, text)
 
     def _sendWAMessage(self, msg):
         if self.connected:
@@ -117,7 +120,7 @@ class Account:
         logger.debug("mark wa message as received")
         if 'msg' in kwargs:
             msg = kwargs['msg']
-            outgoing = OutgoingReceiptProtocolEntity( msg.get("id")
+            outgoing = OutgoingReceiptProtocolEntity( msg.getId()
                                                     , msg.getFrom()
                                                     )
             #self._sendWAMessage(outgoing)
@@ -132,7 +135,7 @@ class Account:
     def markWAMessageAsRead(self, **kwargs):
         if 'msg' in kwargs:
             msg = kwargs['msg']
-            outgoing = OutgoingReceiptProtocolEntity( msg.get("id")
+            outgoing = OutgoingReceiptProtocolEntity( msg.getId()
                                                     , msg.getFrom(True)
                                                     , True
                                                     )
@@ -220,18 +223,20 @@ class Account:
 
             self.xmpp.write(ET.tostring(msg))
 
-    def _sendXMPPMessage(self, frm, text, id):
+    def _sendXMPPMessage(self, frm, text, id=None):
+        if id == None:
+            id = str(uuid.uuid1())
         xmsg = message( mto = self.jid
                       , mfrom = frm
                       , mtype = "chat"
                       , id = id
                       )
-
         body = ET.SubElement(xmsg, "body")
         body.text = text
 
         request = ET.SubElement(xmsg, "request")
         request.set("xmlns", "urn:xmpp:receipts")
+        
         request.set("id", id)
 
         markable = ET.SubElement(xmsg, "markable")
