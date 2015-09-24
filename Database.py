@@ -55,7 +55,7 @@ class Database:
                      )
             return rid
             
-     def lookup_path(self, id):
+    def lookup_path(self, id):
         with self.lock:
             c = self.database.cursor()
             c.execute( "SELECT path, reciever, frm, read FROM files WHERE password = ?"
