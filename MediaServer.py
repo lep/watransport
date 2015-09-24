@@ -33,7 +33,7 @@ class MediaRequest(HttpRequest):
             logger.debug("Invalid path "+path+" (got ids="+str(ids)+")")
             self.error(404, "Not found")
             return
-       id = ids[1]
+        id = ids[1]
 
         res = self.database.lookup_path(id)
         if res:
