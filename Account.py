@@ -91,8 +91,10 @@ class Account:
 
     def try_to_connect(self):
         try:
+            logger.debug("Creating yowsup stack")
             self._mkYStack()
         except:
+            logger.exception("Could not create yowsup stack")
             return
 
 
