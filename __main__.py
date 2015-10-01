@@ -80,7 +80,7 @@ if __name__ == '__main__':
                 for acc in x.accounts.itervalues():
                     if acc.connected:
                         acc.stack.do_detached_callback()
-                    else:
+                    elif not acc.is_connecting:
                         acc.try_to_connect()
             # leave some time for threads and such
             time.sleep(3.0)
