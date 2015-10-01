@@ -66,7 +66,7 @@ class Account:
         r= self.database.read_roster(self.number)
         jidPat = "%s@" + self.config.transport_domain
         self.roster = map(lambda nr: Jid(jidPat % nr), r)
-        self._mkYStack()
+        self.try_to_connect()
 
     def shutdown(self):
         for buddy in self.roster:
