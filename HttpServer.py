@@ -3,6 +3,9 @@ import asynchat
 import asyncore
 import socket
 import re
+import logging
+
+logger = logging.getLogger('watransport.httpserver')
 
 class HttpRequest(asynchat.async_chat):
     def __init__(self, sock):
@@ -39,6 +42,7 @@ class HttpRequest(asynchat.async_chat):
             if not m:
                 continue
             self.headers[m.group(1).lower()] = m.group(2)
+        logger.debug("Got "+self.method+" request for path: "+self.path+" with headers: "+self.headers)
         self.onHeaders()
 
     def onData(self, data):

@@ -42,6 +42,7 @@ class Account:
     ystack = None
     xmpp = None
     connected = False
+    is_connecting = False
 
     roster = None
 
@@ -65,7 +66,7 @@ class Account:
         r= self.database.read_roster(self.number)
         jidPat = "%s@" + self.config.transport_domain
         self.roster = map(lambda nr: Jid(jidPat % nr), r)
-        self._mkYStack()
+        self.try_to_connect()
 
     def shutdown(self):
         for buddy in self.roster:
@@ -91,8 +92,12 @@ class Account:
 
     def try_to_connect(self):
         try:
+            self.is_connecting = True
+            logger.debug("Creating yowsup stack")
             self._mkYStack()
         except:
+            self.is_connecting = False
+            logger.exception("Could not create yowsup stack")
             return
 
 
@@ -270,6 +275,7 @@ class Account:
 
 
     def onYowConnect(self, ystack):
+        self.is_connecting = False
         self.connected = True
         self.ystack = ystack
         for msg in self.message_queue:
